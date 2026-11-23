@@ -1,5 +1,6 @@
 import { startLava } from './lava.js';
 import { startHide } from './hide.js';
+import { startBelAir } from './belair.js';
 
 export const GAMES = [
   {
@@ -15,5 +16,13 @@ export const GAMES = [
     start: startHide,
     input: { jumpLabel: 'RUN', extras: true },
     music: 'hide',
+  },
+  {
+    id: 'belair',
+    title: "DJ Marshmallow's Bel Air Escape",
+    blurb: 'Find three Bee Key Cards and sneak past the Grinch. Watch out, he might be dressed as a bee!',
+    start: startBelAir,
+    input: { jumpLabel: 'RUN', extras: true, throwLabel: 'DANCE' },
+    music: 'game',
   },
 ];

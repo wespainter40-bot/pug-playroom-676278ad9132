@@ -12,16 +12,16 @@ const CSS = `
 .btn.small { font-size: 2.4vmin; padding: 1.2vmin 2vmin; border-width: 0.4vmin; box-shadow: 0 0.6vmin 0 #17612b; }
 .btn[disabled] { filter: grayscale(1) brightness(0.7); cursor: not-allowed; }
 #menu { position: absolute; inset: 0; display: grid; grid-template-columns: 1.15fr 0.85fr; padding: 4vmin 5vmin; gap: 3vmin; }
-#menu .left { display: flex; flex-direction: column; gap: 2.4vmin; justify-content: center; min-width: 0; }
+#menu .left { display: flex; flex-direction: column; gap: 1.6vmin; justify-content: safe center; min-width: 0; overflow-y: auto; }
 .title { font: 900 9vmin/0.95 "Trebuchet MS", system-ui, sans-serif; text-transform: uppercase; color: #fff; text-shadow: 0 0.8vmin 0 #c0392b, 0 1.4vmin 2vmin rgba(0,0,0,.5); letter-spacing: 0.02em; }
 .title span { color: #f1b40f; }
 .sub { font-size: 2.6vmin; opacity: .9; margin-top: -1vmin; }
-.card { background: rgba(10, 30, 18, 0.82); border: 0.5vmin solid #f1b40f; border-radius: 2.6vmin; padding: 2.4vmin 3vmin; display: flex; align-items: center; justify-content: space-between; gap: 2vmin; }
-.card h2 { margin: 0; font-size: 4.2vmin; }
-.card p { margin: 0.6vmin 0 0; font-size: 2.3vmin; opacity: .85; }
-.picker { display: flex; gap: 1.6vmin; }
-.pick { flex: 1; min-width: 0; text-align: center; background: rgba(10, 30, 18, 0.8); border: 0.5vmin solid rgba(255,255,255,.35); border-radius: 2.2vmin; color: #fff; padding: 1.6vmin 1vmin; font: 800 2.6vmin/1.1 "Trebuchet MS", system-ui, sans-serif; cursor: pointer; }
-.pick small { display: block; font-weight: 600; font-size: 1.9vmin; opacity: .8; margin-top: 0.6vmin; }
+.card { background: rgba(10, 30, 18, 0.82); border: 0.5vmin solid #f1b40f; border-radius: 2.6vmin; padding: 1.6vmin 2.6vmin; display: flex; align-items: center; justify-content: space-between; gap: 2vmin; }
+.card h2 { margin: 0; font-size: 3.6vmin; }
+.card p { margin: 0.4vmin 0 0; font-size: 2.1vmin; opacity: .85; }
+.picker { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1.2vmin; }
+.pick { flex: 1; min-width: 0; text-align: center; background: rgba(10, 30, 18, 0.8); border: 0.5vmin solid rgba(255,255,255,.35); border-radius: 2.2vmin; color: #fff; padding: 1.4vmin 0.6vmin; font: 800 2.3vmin/1.1 "Trebuchet MS", system-ui, sans-serif; cursor: pointer; }
+.pick small { display: none; }
 .pick.on { border-color: #f1b40f; background: rgba(193, 57, 43, 0.85); box-shadow: 0 0 0 0.5vmin rgba(241,180,15,.45); }
 .row { display: flex; gap: 1.6vmin; flex-wrap: wrap; align-items: center; }
 .info { font-size: 2.3vmin; opacity: .92; }
@@ -86,10 +86,11 @@ export function createUI({ characters, games, on }) {
     </div>
     <div id="hud" class="hidden">
       <div class="pill"><b>TIME</b><span id="h-time">0:00.0</span></div>
-      <div class="pill"><b>BONES</b><span id="h-bones">0/12</span></div>
-      <div class="pill"><b>SAVED</b><span id="h-saved">0</span></div>
+      <div class="pill"><b id="h-item-label">BONES</b><span id="h-bones">0/12</span></div>
+      <div class="pill" id="h-saved-pill"><b>SAVED</b><span id="h-saved">0</span></div>
       <div class="pill" id="h-left-pill"><b>TODAY LEFT</b><span id="h-left">60:00</span></div>
       <div class="pill hidden" id="h-toys-pill"><b>TOYS</b><span id="h-toys">0</span></div>
+      <div class="pill hidden" id="h-dance-pill"><b>DJ DANCE</b><span id="h-dance">READY</span></div>
       <div class="pill hidden" id="h-noise-pill"><b>NOISE</b><span class="meter"><i id="h-noise"></i></span></div>
       <div class="pill hidden" id="h-hidden-pill">HIDDEN</div>
       <div class="pill hidden" id="dev-badge">DEV</div>
@@ -122,7 +123,7 @@ export function createUI({ characters, games, on }) {
   });
 
   const pickButtons = characters.map((c) => {
-    const b = el(`<button class="pick" data-id="${c.id}">${c.name}<small>${c.blurb}</small></button>`);
+    const b = el(`<button class="pick" data-id="${c.id}" title="${c.blurb}">${c.name}<small>${c.blurb}</small></button>`);
     b.addEventListener('click', () => on.pick(c.id));
     pickerEl.appendChild(b);
     return b;
@@ -163,19 +164,23 @@ export function createUI({ characters, games, on }) {
       q('#hud').classList.remove('hidden');
       q('#playbar').classList.remove('hidden');
     },
-    setHud({ time, bonesRun, bonesMax, saved, remaining, dev, toys, noise, hidden }) {
+    setHud({ time, bonesRun, bonesMax, saved, remaining, dev, toys, noise, hidden, itemLabel, dance }) {
       q('#h-time').textContent = fmtTime(time);
+      q('#h-item-label').textContent = itemLabel || 'BONES';
+      q('#h-saved-pill').classList.toggle('hidden', !!itemLabel);
       q('#h-bones').textContent = `${bonesRun}/${bonesMax}`;
       q('#h-saved').textContent = String(saved);
       q('#h-left-pill').classList.toggle('hidden', !Number.isFinite(remaining));
       if (Number.isFinite(remaining)) q('#h-left').textContent = fmtClock(remaining);
       q('#dev-badge').classList.toggle('hidden', !dev);
-      const extras = Number.isFinite(toys);
-      q('#h-toys-pill').classList.toggle('hidden', !extras);
-      q('#h-noise-pill').classList.toggle('hidden', !extras);
-      q('#h-hidden-pill').classList.toggle('hidden', !extras || !hidden);
-      if (extras) {
-        q('#h-toys').textContent = String(toys);
+      const hasToys = Number.isFinite(toys), hasNoise = Number.isFinite(noise), hasDance = Number.isFinite(dance);
+      q('#h-toys-pill').classList.toggle('hidden', !hasToys);
+      q('#h-noise-pill').classList.toggle('hidden', !hasNoise);
+      q('#h-hidden-pill').classList.toggle('hidden', !hasNoise || !hidden);
+      q('#h-dance-pill').classList.toggle('hidden', !hasDance);
+      if (hasDance) q('#h-dance').textContent = dance > 0 ? `${dance}s` : 'READY';
+      if (hasToys) q('#h-toys').textContent = String(toys);
+      if (hasNoise) {
         const n = Math.max(0, Math.min(1, noise || 0));
         const bar = q('#h-noise');
         bar.style.width = `${Math.round(n * 100)}%`;
@@ -206,7 +211,7 @@ export function createUI({ characters, games, on }) {
         <h1>You made it!</h1>
         <div class="big">Time ${fmtTime(res.time)}</div>
         ${res.isBest ? '<div class="badge">NEW BEST</div>' : ''}
-        <div class="big">Bones banked: ${res.bonesBanked} (saved total ${res.total})</div>
+        <div class="big">${res.summary || `Bones banked: ${res.bonesBanked} (saved total ${res.total})`}</div>
         <div class="row"><button class="btn" id="w-menu">Back to menu</button><button class="btn red" id="w-again">Play again</button></div>
       </div>`;
       w.classList.remove('hidden');

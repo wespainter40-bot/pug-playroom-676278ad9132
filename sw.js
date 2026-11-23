@@ -1,11 +1,11 @@
 // Offline cache: saves every game file on the first visit, then serves from the phone and refreshes quietly when online.
-const CACHE = 'pug-playroom-v1';
+const CACHE = 'pug-playroom-v2';
 const FILES = [
   './', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png',
   './lib/three.module.js', './lib/three.core.js',
-  './src/audio.js', './src/buddy.js', './src/characters.js', './src/input.js', './src/main.js',
+  './src/audio.js', './src/bel-characters.js', './src/buddy.js', './src/characters.js', './src/input.js', './src/main.js',
   './src/music.js', './src/physics.js', './src/rules.js', './src/storage.js', './src/ui.js',
-  './src/games/hide-layout.js', './src/games/hide-nav.js', './src/games/hide-scare.js',
+  './src/games/belair-layout.js', './src/games/belair-scene.js', './src/games/belair.js', './src/games/hide-layout.js', './src/games/hide-nav.js', './src/games/hide-scare.js',
   './src/games/hide-scene.js', './src/games/hide.js', './src/games/lava.js',
   './src/games/layout.js', './src/games/registry.js', './src/games/seeker.js',
 ];

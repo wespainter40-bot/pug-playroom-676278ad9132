@@ -1,9 +1,19 @@
 import * as THREE from 'three';
+import { buildBelCharacter } from './bel-characters.js';
 
 export const CHARACTERS = [
-  { id: 'pug', name: 'Pearson', blurb: 'Blocky pug in a Santa hat', special: 'none', walkSpeed: 6 },
+  { id: 'pug', name: 'Pug', blurb: 'Blocky pug in a Santa hat', special: 'none', walkSpeed: 6 },
   { id: 'phoenix', name: 'Captain Phoenix', blurb: 'Green polo and a big smile. Can glide.', special: 'glide', walkSpeed: 6 },
   { id: 'orbit', name: 'Orbit', blurb: 'Floating robot cube. Can hover.', special: 'hover', walkSpeed: 6 },
+  { id: 'dj', name: 'Marshmallow DJ', blurb: 'Marshmallow head, headphones, and a DJ pad. Can hover.', special: 'hover', walkSpeed: 6 },
+  { id: 'pearson', name: 'Pearson', blurb: 'Basketball star in black and yellow. Can glide.', special: 'glide', walkSpeed: 6 },
+  { id: 'alpink', name: 'Alpink', blurb: 'Pink suit, pink curls, and a rose. Can glide.', special: 'glide', walkSpeed: 6 },
+  { id: 'ezra', name: 'Ezra', blurb: 'Putt-putt pro with a club. Quick on his feet.', special: 'none', walkSpeed: 6.6 },
+  { id: 'coach', name: 'Coach Adam', blurb: 'The PE coach. Big and fast.', special: 'none', walkSpeed: 7 },
+  { id: 'teacher', name: 'Mr. Wesley', blurb: 'The teacher in school colors.', special: 'none', walkSpeed: 6 },
+  { id: 'bee', name: 'Buzz the Bee', blurb: 'The school mascot. Can hover.', special: 'hover', walkSpeed: 6 },
+  { id: 'grinch', name: 'The Grinch', blurb: 'Grumpy and green. Can hover.', special: 'hover', walkSpeed: 6 },
+  { id: 'beegrinch', name: 'Grinch in Bee Suit', blurb: 'Sneaky Grinch in a bee costume. Can glide.', special: 'glide', walkSpeed: 6 },
 ];
 
 let lift = 0;
@@ -171,7 +181,7 @@ export function buildCharacter(id) {
   if (id === 'pug') return buildPug();
   if (id === 'phoenix') return buildPhoenix();
   if (id === 'orbit') return buildOrbitShape(1);
-  throw new Error(`unknown character: ${id}`);
+  return buildBelCharacter(id);
 }
 
 export function buildBuddy() {

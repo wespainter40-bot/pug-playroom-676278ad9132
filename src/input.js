@@ -4,6 +4,7 @@ const STICK_RADIUS = 60;
 export function createInput(canvas, opts = {}) {
   const jumpLabel = opts.jumpLabel || 'JUMP';
   const extras = !!opts.extras;
+  const throwLabel = opts.throwLabel || 'THROW';
   const keys = new Set();
   let lookDelta = 0;
   let dragId = null;
@@ -49,7 +50,7 @@ export function createInput(canvas, opts = {}) {
     ui.id = 'touch-ui';
     ui.innerHTML = `
       <div id="stick-base"><div id="stick-knob"></div></div>
-      <div id="jump-btn">${jumpLabel}</div>${extras ? '<div id="sneak-btn" class="xbtn">SNEAK</div><div id="throw-btn" class="xbtn">THROW</div>' : ''}`;
+      <div id="jump-btn">${jumpLabel}</div>${extras ? `<div id="sneak-btn" class="xbtn">SNEAK</div><div id="throw-btn" class="xbtn">${throwLabel}</div>` : ''}`;
     const style = document.createElement('style');
     style.textContent = `
       #touch-ui { position: fixed; inset: 0; pointer-events: none; z-index: 5; user-select: none; -webkit-user-select: none; }
