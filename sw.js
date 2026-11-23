@@ -1,5 +1,5 @@
 // Offline cache: saves every game file on the first visit, then serves from the phone and refreshes quietly when online.
-const CACHE = 'pug-playroom-v3';
+const CACHE = 'pug-playroom-v4';
 const FILES = [
   './', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png',
   './lib/three.module.js', './lib/three.core.js',

@@ -9,7 +9,7 @@ import {
 import { buildSchool, buildCard, buildBeam } from './belair-scene.js';
 
 const CAM_DIST = 6.5, CAM_HEIGHT = 3.8;
-const CAM_BOX = { minX: -23, maxX: 22.4, minZ: -7.2, maxZ: 14.3 };
+const CAM_BOX = { minX: -23, maxX: 22.4, minZ: -7.2, maxZ: 28.3 };
 const DEV_SPEED = 1.6;
 const TUNE = 'game';
 const TICKLE_SECONDS = 1.5, SLEEP_AFTER_CATCH = 2.5, START_SLEEP = 2.5;

@@ -4,7 +4,7 @@ import { STANCE_SPEED, stanceFor } from './hide-layout.js';
 
 export { STANCE_SPEED, stanceFor };
 
-export const ROOM = { minX: -25, maxX: 25, minZ: -9, maxZ: 16 };
+export const ROOM = { minX: -25, maxX: 25, minZ: -9, maxZ: 30 };
 export const START = { x: -22, y: 0, z: -4 };
 export const EXIT = { x: 22.8, z: -4, radius: 1.9 };
 export const CARD_RADIUS = 1.25;
@@ -18,13 +18,19 @@ export const ROOMS = [
   { id: 'class', name: 'Classroom', minX: -25, maxX: -1, minZ: 0.5, maxZ: 16 },
   { id: 'cafe', name: 'Cafeteria', minX: -1, maxX: 11.5, minZ: 0.5, maxZ: 16 },
   { id: 'gym', name: 'Gym', minX: 11.5, maxX: 25, minZ: 0.5, maxZ: 16 },
+  { id: 'library', name: 'Library', minX: -25, maxX: 11.5, minZ: 16, maxZ: 30 },
+  { id: 'office', name: "Principal's Office", minX: 11.5, maxX: 25, minZ: 16, maxZ: 30 },
 ];
 
 export const DOOR = { id: 'dClass', rooms: ['class', 'hall'], x: -7, z: 0.5, width: 4 };
 export const DOOR_CAFE = { id: 'dCafe', rooms: ['cafe', 'hall'], x: 5, z: 0.5, width: 4 };
 export const DOOR_GYM = { id: 'dGym', rooms: ['gym', 'hall'], x: 18, z: 0.5, width: 4 };
 export const DOOR_CAFE_GYM = { id: 'dCafeGym', rooms: ['cafe', 'gym'], x: 11.5, z: 9, width: 3 };
-export const DOORS = [DOOR, DOOR_CAFE, DOOR_GYM, DOOR_CAFE_GYM];
+export const DOOR_CLASS_LIB = { id: 'dClassLib', rooms: ['class', 'library'], x: -21.75, z: 15.5, width: 3.5 };
+export const DOOR_CAFE_LIB = { id: 'dCafeLib', rooms: ['cafe', 'library'], x: 1.7, z: 15.5, width: 3 };
+export const DOOR_GYM_OFFICE = { id: 'dGymOffice', rooms: ['gym', 'office'], x: 22.5, z: 15.5, width: 3 };
+export const DOOR_LIB_OFFICE = { id: 'dLibOffice', rooms: ['library', 'office'], x: 11.5, z: 22.5, width: 3 };
+export const DOORS = [DOOR, DOOR_CAFE, DOOR_GYM, DOOR_CAFE_GYM, DOOR_CLASS_LIB, DOOR_CAFE_LIB, DOOR_GYM_OFFICE, DOOR_LIB_OFFICE];
 export const NAV = createNav(ROOMS, DOORS);
 export const roomIdAt = NAV.roomAt;
 
@@ -45,15 +51,21 @@ export const DOOR_GAP = [-9, -5];
 export const CAFE_GAP = [3, 7];
 export const GYM_GAP = [16, 20];
 export const CAFE_GYM_GAP = [7.5, 10.5];
+export const CLASS_LIB_GAP = [-23.5, -20];
+export const CAFE_LIB_GAP = [0.2, 3.2];
+export const GYM_OFFICE_GAP = [21, 24];
+export const LIB_OFFICE_GAP = [21, 24];
 
 export const WALLS = [
   ...wallRun('wallN', 'x', [-9, -8], -24, 24),
-  ...wallRun('wallE', 'z', [24, 25], -9, 16),
-  ...wallRun('wallW', 'z', [-25, -24], -9, 16),
+  ...wallRun('wallE', 'z', [24, 25], -9, 30),
+  ...wallRun('wallW', 'z', [-25, -24], -9, 30),
   ...wallRun('wallHS', 'x', [0, 1], -24, 24, [DOOR_GAP, CAFE_GAP, GYM_GAP]),
   ...wallRun('wallCE', 'z', [-2, -1], 1, 16),
-  ...wallRun('wallCS', 'x', [15, 16], -24, 24),
+  ...wallRun('wallCS', 'x', [15, 16], -24, 24, [CLASS_LIB_GAP, CAFE_LIB_GAP, GYM_OFFICE_GAP]),
   ...wallRun('wallCG', 'z', [11, 12], 1, 15, [CAFE_GYM_GAP]),
+  ...wallRun('wallS', 'x', [29, 30], -24, 24),
+  ...wallRun('wallLO', 'z', [11, 12], 16, 29, [LIB_OFFICE_GAP]),
 ];
 
 const LOCKER_H = 3.2;
@@ -62,7 +74,7 @@ for (const z of [4, 8]) for (const x of [-21, -17, -13]) STUDENT_DESKS.push(soli
 export { STUDENT_DESKS };
 
 export const SOLIDS = [
-  { id: 'floor', min: { x: -26, y: -3, z: -10 }, max: { x: 26, y: 0, z: 17 } },
+  { id: 'floor', min: { x: -26, y: -3, z: -10 }, max: { x: 26, y: 0, z: 31 } },
   ...WALLS,
   // Hallway lockers along the north wall, with a coat cubby between two partitions.
   solid('lockersA', -22, -8, -12, -7.1, LOCKER_H),
@@ -87,6 +99,20 @@ export const SOLIDS = [
   solid('ballCart', 15, 6, 16.4, 7.2, 1.1),
   solid('crates', 13, 11, 14.4, 12.4, 1.4),
   solid('vaultBox', 17, 9.5, 18.6, 10.6, 1.1),
+  // Library.
+  solid('libA1', -20, 19.5, -12, 20.6, 3.4),
+  solid('libA2', -8.5, 19.5, 0, 20.6, 3.4),
+  solid('libB1', -20, 24, -12, 25.1, 3.4),
+  solid('libB2', -8.5, 24, 0, 25.1, 3.4),
+  solid('libB3', 3, 22, 4.1, 28, 3.4),
+  solid('libC', 7.5, 24.5, 8.6, 29, 3.4),
+  solid('readTable', -6, 21.4, -2.5, 23.2, 0.85),
+  solid('libCounter', 5, 17.5, 9, 18.7, 1.1),
+  // Principal's office.
+  solid('principalDesk', 16, 22, 21, 24, 1.1),
+  solid('filing', 23, 17.4, 24, 22.4, 1.8),
+  solid('couch', 22.6, 25.4, 24, 28.2, 0.9),
+  solid('plant', 12.3, 27.6, 13.5, 28.8, 1.8),
 ];
 
 const furniture = SOLIDS.filter((s) => s.id !== 'floor' && !s.id.startsWith('wall'));
@@ -98,6 +124,8 @@ export const SPOTS = [
   { id: 'storyTable', kind: 'table', x0: -7.9, x1: -4.1, z0: 10.1, z1: 12.9 },
   { id: 'lunchNook', kind: 'nook', x0: 3.6, x1: 10.4, z0: 13.4, z1: 14.6 },
   { id: 'bleacherNook', kind: 'nook', x0: 22.8, x1: 23.8, z0: 4, z1: 11 },
+  { id: 'libNook', kind: 'nook', x0: 9, x1: 10.6, z0: 25.5, z1: 28.5 },
+  { id: 'meetingTable', kind: 'table', x0: 13.4, x1: 16.8, z0: 25, z1: 27 },
 ];
 
 export const CARDS = [
@@ -105,14 +133,18 @@ export const CARDS = [
   { id: 'k2', x: 6, y: 1.2, z: -7.2, where: 'the coat cubby' },
   { id: 'k3', x: 14, y: 1.3, z: 13.8, where: 'the gym corner' },
   { id: 'k4', x: 6.5, y: 1.3, z: 9.7, where: 'the lunch table' },
+  { id: 'k5', x: -16, y: 1.3, z: 27, where: 'the library reading corner' },
+  { id: 'k6', x: 18.5, y: 1.5, z: 22.6, where: "the principal's desk" },
 ];
 
 export const WAYPOINTS = [
   { x: -18, z: -4 }, { x: -7, z: -4 },
   { x: -7, z: 4 }, { x: -10, z: 10.8 }, { x: -19, z: 11 }, { x: -19, z: 6 }, { x: -12, z: 6 }, { x: -7, z: 3 },
   { x: -7, z: -4 }, { x: 8, z: -4 },
-  { x: 5, z: 2.4 }, { x: 0.8, z: 3 }, { x: 0.8, z: 12.5 }, { x: 0.8, z: 14.2 }, { x: 0.8, z: 6.8 }, { x: 9.8, z: 6.8 }, { x: 9.8, z: 10.9 },
-  { x: 14, z: 9 }, { x: 14, z: 3.2 }, { x: 19.5, z: 3.2 }, { x: 19.5, z: 13.3 }, { x: 15.5, z: 13.3 }, { x: 16, z: 9 },
+  { x: 5, z: 2.4 }, { x: 0.8, z: 3 }, { x: 0.8, z: 6.8 }, { x: 9.8, z: 6.8 }, { x: 9.8, z: 10.9 }, { x: 1.5, z: 11 }, { x: 1.5, z: 14.2 },
+  { x: 1.7, z: 18.2 }, { x: -10.5, z: 18.2 }, { x: -10.5, z: 22.3 }, { x: -22, z: 22.3 }, { x: -22, z: 27 }, { x: -10.5, z: 27 }, { x: 1.5, z: 27.2 }, { x: 1.5, z: 21.2 }, { x: 9.5, z: 21.2 },
+  { x: 13.5, z: 20.5 }, { x: 13.5, z: 27 }, { x: 21, z: 27.2 }, { x: 21.9, z: 25 }, { x: 21.9, z: 19.5 }, { x: 21.9, z: 16.8 },
+  { x: 19.5, z: 13.3 }, { x: 15.5, z: 13.3 }, { x: 15.6, z: 9.2 }, { x: 14, z: 9 }, { x: 14, z: 3.2 }, { x: 19.5, z: 3.2 },
   { x: 20, z: -3.5 }, { x: 12, z: -4.5 },
 ];
 

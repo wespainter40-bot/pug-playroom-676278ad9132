@@ -230,8 +230,8 @@ function buildCafeteria(group) {
   lunch.position.set(7, 3.2, 14.9);
   group.add(lunch);
   const menu = signPlane(3.6, 1.3, 'TODAY: PIZZA!', '#2b3a2b', '#fff3c4', 512);
-  menu.position.set(-0.6, 3.1, 14.92);
-  menu.rotation.y = Math.PI;
+  menu.position.set(-0.92, 3.1, 8);
+  menu.rotation.y = Math.PI / 2;
   group.add(menu);
   const win = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.8), glow(0xbfe6ff));
   win.rotation.y = -Math.PI / 2;
@@ -307,6 +307,151 @@ function buildGym(group) {
   group.add(score);
 }
 
+function bookFace(w, h) {
+  const tex = canvasTexture(512, Math.round(512 * (h / w)), (g, cw, ch) => {
+    g.fillStyle = '#6b4423';
+    g.fillRect(0, 0, cw, ch);
+    const rows = 4, rh = ch / rows;
+    const cols = ['#e74c3c', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6', '#ff8a3d', '#1abc9c', '#ecf0f1'];
+    let n = 0;
+    for (let r = 0; r < rows; r++) {
+      let x = 6;
+      while (x < cw - 14) {
+        const bw = 9 + ((n * 7) % 13), bh = rh * (0.62 + ((n * 5) % 4) * 0.08);
+        g.fillStyle = cols[(n * 3 + r) % cols.length];
+        g.fillRect(x, (r + 1) * rh - 8 - bh, bw, bh);
+        x += bw + 2;
+        n++;
+      }
+      g.fillStyle = '#3d2610';
+      g.fillRect(0, (r + 1) * rh - 8, cw, 8);
+    }
+  });
+  return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex }));
+}
+
+function buildLibrary(group) {
+  for (const id of ['libA1', 'libA2', 'libB1', 'libB2', 'libB3', 'libC']) {
+    const sh = SOLIDS.find((q) => q.id === id);
+    const cx = (sh.min.x + sh.max.x) / 2, cz = (sh.min.z + sh.max.z) / 2;
+    group.add(slabMesh(sh, new THREE.MeshPhongMaterial({ color: 0x6b4423 })));
+    const alongX = sh.max.x - sh.min.x > sh.max.z - sh.min.z;
+    const len = alongX ? sh.max.x - sh.min.x : sh.max.z - sh.min.z;
+    for (const side of [-1, 1]) {
+      const face = bookFace(len - 0.1, sh.max.y - 0.2);
+      if (alongX) {
+        face.position.set(cx, sh.max.y / 2, cz + side * ((sh.max.z - sh.min.z) / 2 + 0.01));
+        if (side < 0) face.rotation.y = Math.PI;
+      } else {
+        face.rotation.y = side * Math.PI / 2;
+        face.position.set(cx + side * ((sh.max.x - sh.min.x) / 2 + 0.01), sh.max.y / 2, cz);
+      }
+      group.add(face);
+    }
+  }
+
+  const t = SOLIDS.find((q) => q.id === 'readTable');
+  const tx = (t.min.x + t.max.x) / 2, tz = (t.min.z + t.max.z) / 2;
+  group.add(bx(t.max.x - t.min.x, 0.1, t.max.z - t.min.z, 0xc99b5a, tx, 0.8, tz, 0.03));
+  for (const x of [t.min.x + 0.3, t.max.x - 0.3]) for (const z of [t.min.z + 0.3, t.max.z - 0.3]) group.add(bx(0.1, 0.76, 0.1, 0x5a3a1a, x, 0.38, z, 0.02));
+  group.add(bx(0.5, 0.06, 0.38, 0xe74c3c, tx - 0.6, 0.88, tz, 0.01));
+  group.add(bx(0.5, 0.06, 0.38, 0x3498db, tx + 0.5, 0.88, tz + 0.1, 0.01));
+  group.add(bx(0.1, 0.45, 0.1, 0x2b3a2b, tx, 1.05, tz, 0.02));
+  group.add(bx(0.4, 0.14, 0.4, 0xffe14d, tx, 1.32, tz, 0.04));
+
+  const c = SOLIDS.find((q) => q.id === 'libCounter');
+  const cx = (c.min.x + c.max.x) / 2, cz = (c.min.z + c.max.z) / 2;
+  group.add(bx(c.max.x - c.min.x, c.max.y - 0.1, c.max.z - c.min.z, 0x9a6a38, cx, (c.max.y - 0.1) / 2, cz, 0.04));
+  group.add(bx(c.max.x - c.min.x + 0.15, 0.1, c.max.z - c.min.z + 0.2, 0xc99b5a, cx, c.max.y - 0.05, cz, 0.03));
+  group.add(bx(0.6, 0.35, 0.45, 0xd8d8e0, cx - 1.2, c.max.y + 0.2, cz, 0.05));
+  for (let i = 0; i < 4; i++) group.add(bx(0.5, 0.08 + i * 0.01, 0.38, [0xe74c3c, 0x3498db, 0xf1c40f, 0x2ecc71][i], cx + 0.9, c.max.y + 0.05 + i * 0.09, cz, 0.01));
+
+  const rug = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.6, 0.03, 32), new THREE.MeshPhongMaterial({ color: 0xe9b949 }));
+  rug.position.set(-4.2, 0.03, 22.3);
+  group.add(rug);
+  const nook = SPOTS.find((q) => q.id === 'libNook');
+  group.add(bx(nook.x1 - nook.x0 + 0.2, 0.03, nook.z1 - nook.z0, 0x3b6ea8, (nook.x0 + nook.x1) / 2, 0.03, (nook.z0 + nook.z1) / 2, 0.01));
+  const bag = new THREE.Mesh(new THREE.SphereGeometry(0.7, 16, 10), new THREE.MeshPhongMaterial({ color: 0x4ac1a2 }));
+  bag.scale.set(1, 0.5, 1);
+  bag.position.set(-16, 0.3, 28);
+  group.add(bag);
+
+  const lib = signPlane(5, 0.9, 'LIBRARY', '#6b3fa0', '#ffe14d', 640);
+  lib.rotation.y = Math.PI;
+  lib.position.set(-10, 4.2, 28.93);
+  group.add(lib);
+  const quiet = signPlane(4, 0.7, 'SHHH! QUIET BEES', '#f4f4f6', '#6b3fa0', 640);
+  quiet.rotation.y = Math.PI;
+  quiet.position.set(-18, 3.6, 28.93);
+  group.add(quiet);
+  const check = signPlane(2.6, 0.55, 'CHECK OUT', '#6b3fa0', '#ffffff', 384);
+  check.position.set(7, 2.3, 17.55);
+  group.add(check);
+}
+
+function buildOffice(group) {
+  const d = SOLIDS.find((q) => q.id === 'principalDesk');
+  const dx = (d.min.x + d.max.x) / 2, dz = (d.min.z + d.max.z) / 2;
+  group.add(bx(d.max.x - d.min.x, 0.12, d.max.z - d.min.z, 0x5a3a1a, dx, d.max.y - 0.06, dz, 0.04));
+  group.add(bx(d.max.x - d.min.x - 0.3, d.max.y - 0.14, d.max.z - d.min.z - 0.3, 0x3e2712, dx, (d.max.y - 0.12) / 2, dz, 0.04));
+  group.add(bx(0.7, 0.05, 0.5, 0xd8d8e0, dx + 1.4, d.max.y + 0.03, dz - 0.2, 0.01));
+  group.add(bx(0.7, 0.4, 0.05, 0x222a33, dx + 1.4, d.max.y + 0.25, dz - 0.4, 0.01));
+  group.add(bx(0.9, 0.2, 0.25, 0xffd23f, dx - 0.5, d.max.y + 0.12, dz + 0.45, 0.02));
+  group.add(bx(1.0, 1.4, 0.5, 0x2b1b3a, dx, 0.8, dz - 1.4, 0.08));
+  group.add(bx(1.0, 0.5, 1.0, 0x2b1b3a, dx, 0.3, dz - 1.2, 0.08));
+
+  const f = SOLIDS.find((q) => q.id === 'filing');
+  const fz = (f.min.z + f.max.z) / 2;
+  group.add(bx(f.max.x - f.min.x, f.max.y, f.max.z - f.min.z, 0x8a919e, (f.min.x + f.max.x) / 2, f.max.y / 2, fz, 0.04));
+  for (let i = 0; i < 4; i++) {
+    const z = f.min.z + 0.65 + i * 1.25;
+    group.add(bx(0.04, 0.5, 1.1, 0x6a717e, f.min.x - 0.02, 0.5 + (i % 2) * 0.6, z, 0.02));
+    group.add(bx(0.06, 0.08, 0.4, 0xe6e6ea, f.min.x - 0.05, 0.55 + (i % 2) * 0.6, z, 0.01));
+  }
+
+  const cu = SOLIDS.find((q) => q.id === 'couch');
+  const ux = (cu.min.x + cu.max.x) / 2, uz = (cu.min.z + cu.max.z) / 2;
+  group.add(bx(cu.max.x - cu.min.x, 0.5, cu.max.z - cu.min.z, 0xc0392b, ux, 0.3, uz, 0.08));
+  group.add(bx(0.4, 0.9, cu.max.z - cu.min.z, 0xa93226, cu.max.x - 0.2, 0.7, uz, 0.08));
+  group.add(bx(0.8, 0.25, 0.8, 0xf1c40f, ux - 0.1, 0.65, uz - 0.7, 0.08));
+
+  const pl = SOLIDS.find((q) => q.id === 'plant');
+  const px = (pl.min.x + pl.max.x) / 2, pz = (pl.min.z + pl.max.z) / 2;
+  group.add(bx(0.9, 0.6, 0.9, 0xb5651d, px, 0.3, pz, 0.08));
+  for (const [ox, oy, oz, r] of [[0, 1.2, 0, 0.6], [0.3, 1.55, 0.1, 0.45], [-0.3, 1.45, -0.2, 0.45]]) {
+    const leaf = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 9), new THREE.MeshPhongMaterial({ color: 0x2e9b4a }));
+    leaf.position.set(px + ox, oy, pz + oz);
+    group.add(leaf);
+  }
+
+  const m = SPOTS.find((q) => q.id === 'meetingTable');
+  const mx = (m.x0 + m.x1) / 2, mz = (m.z0 + m.z1) / 2;
+  group.add(bx(m.x1 - m.x0, 0.1, m.z1 - m.z0, 0xf4f4f6, mx, 0.8, mz, 0.04));
+  for (const x of [m.x0 + 0.3, m.x1 - 0.3]) for (const z of [m.z0 + 0.3, m.z1 - 0.3]) group.add(bx(0.1, 0.76, 0.1, 0x555a66, x, 0.38, z, 0.02));
+  for (const x of [mx - 1, mx + 1]) for (const dzc of [-1.3, 1.3]) {
+    group.add(bx(0.5, 0.08, 0.5, 0x3b6ea8, x, 0.45, mz + dzc, 0.03));
+    group.add(bx(0.5, 0.5, 0.08, 0x3b6ea8, x, 0.72, mz + dzc + (dzc < 0 ? -0.22 : 0.22), 0.03));
+  }
+  group.add(bx(0.6, 0.06, 0.4, 0xffd23f, mx, 0.88, mz, 0.01));
+
+  const rug = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 0.03, 32), new THREE.MeshPhongMaterial({ color: 0x2f6fb5 }));
+  rug.position.set(18.5, 0.03, 20);
+  group.add(rug);
+
+  const plate = signPlane(5.4, 0.9, "PRINCIPAL'S OFFICE", '#1f4e9c', '#ffe14d', 768);
+  plate.rotation.y = Math.PI;
+  plate.position.set(18, 4.2, 28.93);
+  group.add(plate);
+  for (const [x, c1] of [[14.5, 0xf1c40f], [17.5, 0x3498db], [20.5, 0xe74c3c]]) {
+    group.add(bx(1.5, 1.1, 0.06, 0x3e2712, x, 3.1, 28.92, 0.02));
+    group.add(bx(1.3, 0.9, 0.04, c1, x, 3.1, 28.88, 0.01));
+  }
+  const win = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 2), glow(0xbfe6ff));
+  win.rotation.y = -Math.PI / 2;
+  win.position.set(23.92, 3.2, 24);
+  group.add(win);
+}
+
 function buildDoorHeaders(group) {
   const out = [];
   for (const [x, text, bg, fg] of [[-7, 'CLASSROOM', '#2f6fb5', '#ffe14d'], [5, 'CAFETERIA', '#e8a23a', '#2b1b00'], [18, 'GYM', '#2e9b4a', '#ffffff']]) {
@@ -367,6 +512,8 @@ export function buildSchool() {
   root.add(floorPlane(-25, 0.5, -1, 16, planks(8, 4)));
   root.add(floorPlane(-1, 0.5, 11.5, 16, tiled(6.25, 7.75, '#f7e1b5', '#d98c4a')));
   root.add(floorPlane(11.5, 0.5, 25, 16, planks(7, 5)));
+  root.add(floorPlane(-25, 16, 11.5, 30, tiled(18, 7, '#8a63b0', '#7a54a0')));
+  root.add(floorPlane(11.5, 16, 25, 30, tiled(6.75, 7, '#4f8c6a', '#447d5d')));
   const void_ = new THREE.Mesh(new THREE.PlaneGeometry(120, 120), new THREE.MeshBasicMaterial({ color: 0x0e1a2c }));
   void_.rotation.x = -Math.PI / 2;
   void_.position.y = -0.05;
@@ -374,7 +521,7 @@ export function buildSchool() {
 
   const skin = new THREE.MeshPhongMaterial({ map: wallSkin('#f6e7a8', '#2f6fb5'), shininess: 8 });
   const wallGroups = [];
-  const outer = new Set(['wallN', 'wallE', 'wallW', 'wallCS']);
+  const outer = new Set(['wallN', 'wallE', 'wallW', 'wallS']);
   for (const w of WALLS) {
     const g = new THREE.Group();
     g.add(slabMesh(w, skin));
@@ -396,6 +543,8 @@ export function buildSchool() {
   buildClassroom(root);
   buildCafeteria(root);
   buildGym(root);
+  buildLibrary(root);
+  buildOffice(root);
   const headers = buildDoorHeaders(root);
   wallGroups.push(...headers.map((g) => ({ g, hide: true, boxes: WALLS.filter((w) => w.id.startsWith('wallHS')) })));
   const exit = buildExit(root);
@@ -407,7 +556,7 @@ export function buildSchool() {
   banner2.position.set(12, 4.5, -7.95);
   root.add(banner2);
 
-  const lamps = [[-18, -4], [-7, -4], [8, -4], [20, -4], [-18, 8], [-8, 8], [5, 4.8], [5, 8.8], [16.4, 4], [16.4, 12]];
+  const lamps = [[-18, -4], [-7, -4], [8, -4], [20, -4], [-18, 8], [-8, 8], [5, 4.8], [5, 8.8], [16.4, 4], [16.4, 12], [-14, 22.3], [-4, 22.3], [5, 26], [-14, 27], [18, 19], [18, 26]];
   for (const [x, z] of lamps) root.add(bx(1.4, 0.15, 0.6, 0xfff7d0, x, 5.35, z, 0.05));
 
   function lowerWalls(camX, camZ, px, pz) {
