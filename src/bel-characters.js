@@ -585,3 +585,5 @@ export function buildBelCharacter(id) {
     default: throw new Error(`unknown Bel Air character: ${id}`);
   }
 }
+
+export { mat, rb, pivot, capsule, ball, cyl, onSphere, canvasTex, textPlane, css, faceTexture, headGroup, hairCap, hairCurls, rig, jerseyTrim, shortsStripe };

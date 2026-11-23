@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { createStorage } from './storage.js';
-import { createPlayClock, boneTotal } from './rules.js';
+import { createPlayClock, boneTotal, isUnlocked } from './rules.js';
 import { CHARACTERS, buildCharacter, animateCharacter } from './characters.js';
 import { GAMES } from './games/registry.js';
 import { createInput } from './input.js';
@@ -98,6 +98,7 @@ function menuInfo() {
     locked: clock.isLocked(),
     bonesTotal: boneTotal(store),
     bestTimes: store.load('bestTimes', {}),
+    unlocks: { blitz: isUnlocked(store, 'blitz', dev) },
   };
 }
 
@@ -128,6 +129,7 @@ function startGame(id) {
   if (clock.isLocked()) { ui.showLocked(); ui.showMenu(menuInfo()); return; }
   const def = GAMES.find((g) => g.id === id);
   if (!def) return;
+  if (def.requires && !isUnlocked(store, def.requires, dev)) { ui.showMenu(menuInfo()); return; }
   if (game) { game.dispose(); input.destroy(); }
   gameId = id;
   stage.visible = false;
@@ -239,6 +241,12 @@ window.__game = {
   teleport: (x, y, z) => game && game.teleport(x, y, z),
   call: (fn, ...args) => game && game[fn] && game[fn](...args),
 };
+window.__renderInfo = () => ({
+  triangles: renderer.info.render.triangles,
+  calls: renderer.info.render.calls,
+  geometries: renderer.info.memory.geometries,
+  textures: renderer.info.memory.textures,
+});
 window.__audio = () => audio.stats();
 window.__input = () => input && input.read();
 window.__setLimit = (seconds) => {

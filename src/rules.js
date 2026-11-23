@@ -59,3 +59,16 @@ export function boneTotal(store) {
   const v = store.load('bones', 0);
   return Number.isFinite(v) && v >= 0 ? v : 0;
 }
+
+export function isUnlocked(store, key, devMode = false) {
+  if (devMode) return true;
+  const u = store.load('unlocks', {});
+  return !!(u && typeof u === 'object' && u[key] === true);
+}
+
+export function grantUnlock(store, key) {
+  const u = store.load('unlocks', {});
+  const next = u && typeof u === 'object' && !Array.isArray(u) ? u : {};
+  next[key] = true;
+  store.save('unlocks', next);
+}

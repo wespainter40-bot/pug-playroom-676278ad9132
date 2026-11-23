@@ -90,6 +90,8 @@ export function createUI({ characters, games, on }) {
       <div class="pill" id="h-saved-pill"><b>SAVED</b><span id="h-saved">0</span></div>
       <div class="pill" id="h-left-pill"><b>TODAY LEFT</b><span id="h-left">60:00</span></div>
       <div class="pill hidden" id="h-toys-pill"><b>TOYS</b><span id="h-toys">0</span></div>
+      <div class="pill hidden" id="h-down-pill"><span id="h-down"></span></div>
+      <div class="pill hidden" id="h-ammo-pill"><b>WATER</b><span id="h-ammo">0</span></div>
       <div class="pill hidden" id="h-dance-pill"><b>DJ DANCE</b><span id="h-dance">READY</span></div>
       <div class="pill hidden" id="h-noise-pill"><b>NOISE</b><span class="meter"><i id="h-noise"></i></span></div>
       <div class="pill hidden" id="h-hidden-pill">HIDDEN</div>
@@ -119,7 +121,7 @@ export function createUI({ characters, games, on }) {
     const card = el(`<div class="card"><div><h2>${g.title}</h2><p>${g.blurb}</p><p id="best-${g.id}"></p></div><button class="btn" data-play="${g.id}">Play!</button></div>`);
     card.querySelector('button').addEventListener('click', () => on.play(g.id));
     gamesEl.appendChild(card);
-    return { id: g.id, btn: card.querySelector('button'), best: card.querySelector(`#best-${g.id}`) };
+    return { id: g.id, requires: g.requires, btn: card.querySelector('button'), best: card.querySelector(`#best-${g.id}`) };
   });
 
   const pickButtons = characters.map((c) => {
@@ -149,9 +151,12 @@ export function createUI({ characters, games, on }) {
       q('#playbar').classList.add('hidden');
       pickButtons.forEach((b) => b.classList.toggle('on', b.dataset.id === info.character));
       gameButtons.forEach((g) => {
-        g.btn.disabled = !!info.locked;
+        const gated = !!g.requires && !(info.unlocks && info.unlocks[g.requires]);
+        g.btn.disabled = !!info.locked || gated;
         const best = info.bestTimes && info.bestTimes[g.id];
-        g.best.textContent = Number.isFinite(best) ? `Best time: ${fmtTime(best)}` : 'No best time yet';
+        g.best.textContent = gated
+          ? 'Beat the Steelers in Flag Football to unlock'
+          : Number.isFinite(best) ? `Best time: ${fmtTime(best)}` : 'No best time yet';
       });
       const bonesLine = `Golden bones saved: ${info.bonesTotal}. Collect them in a run and win to keep them.`;
       q('#menu-info').innerHTML = info.locked
@@ -164,7 +169,7 @@ export function createUI({ characters, games, on }) {
       q('#hud').classList.remove('hidden');
       q('#playbar').classList.remove('hidden');
     },
-    setHud({ time, bonesRun, bonesMax, saved, remaining, dev, toys, noise, hidden, itemLabel, dance }) {
+    setHud({ time, bonesRun, bonesMax, saved, remaining, dev, toys, noise, hidden, itemLabel, dance, down, ammo }) {
       q('#h-time').textContent = fmtTime(time);
       q('#h-item-label').textContent = itemLabel || 'BONES';
       q('#h-saved-pill').classList.toggle('hidden', !!itemLabel);
@@ -178,6 +183,11 @@ export function createUI({ characters, games, on }) {
       q('#h-noise-pill').classList.toggle('hidden', !hasNoise);
       q('#h-hidden-pill').classList.toggle('hidden', !hasNoise || !hidden);
       q('#h-dance-pill').classList.toggle('hidden', !hasDance);
+      q('#h-down-pill').classList.toggle('hidden', !down);
+      if (down) q('#h-down').textContent = down;
+      const hasAmmo = Number.isFinite(ammo);
+      q('#h-ammo-pill').classList.toggle('hidden', !hasAmmo);
+      if (hasAmmo) q('#h-ammo').textContent = String(ammo);
       if (hasDance) q('#h-dance').textContent = dance > 0 ? `${dance}s` : 'READY';
       if (hasToys) q('#h-toys').textContent = String(toys);
       if (hasNoise) {
