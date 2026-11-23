@@ -182,6 +182,146 @@ function buildClassroom(group) {
   }
 }
 
+
+const ball = (r, color, x, y, z) => {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 14, 10), new THREE.MeshPhongMaterial({ color }));
+  m.position.set(x, y, z);
+  return m;
+};
+
+function buildCafeteria(group) {
+  for (const id of ['cafeTable1', 'cafeTable2']) {
+    const t = SOLIDS.find((q) => q.id === id);
+    const cx = (t.min.x + t.max.x) / 2, cz = (t.min.z + t.max.z) / 2;
+    group.add(bx(t.max.x - t.min.x, 0.1, 1.15, 0x4a90d9, cx, 0.8, cz, 0.03));
+    for (const x of [t.min.x + 0.4, t.max.x - 0.4]) group.add(bx(0.12, 0.76, 1.0, 0x555a66, x, 0.38, cz, 0.02));
+    for (const dz of [-0.95, 0.95]) {
+      group.add(bx(t.max.x - t.min.x - 0.3, 0.09, 0.42, 0xe8a23a, cx, 0.46, cz + dz, 0.03));
+      for (const x of [t.min.x + 0.5, t.max.x - 0.5]) group.add(bx(0.1, 0.42, 0.1, 0x555a66, x, 0.21, cz + dz, 0.02));
+    }
+    for (let i = 0; i < 4; i++) {
+      const x = t.min.x + 0.9 + i * 1.5;
+      group.add(bx(0.6, 0.04, 0.42, 0xe2e2e8, x, 0.87, cz - 0.25, 0.01));
+      const pizza = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.03, 14), new THREE.MeshPhongMaterial({ color: 0xe9722b }));
+      pizza.position.set(x, 0.9, cz - 0.25);
+      group.add(pizza);
+      group.add(bx(0.12, 0.2, 0.1, 0xf4f4f6, x + 0.35, 0.97, cz + 0.2, 0.02));
+    }
+  }
+
+  const c = SOLIDS.find((q) => q.id === 'lunchCounter');
+  const cx = (c.min.x + c.max.x) / 2, cz = (c.min.z + c.max.z) / 2;
+  group.add(bx(c.max.x - c.min.x, c.max.y - 0.1, c.max.z - c.min.z, 0xd9d9e0, cx, (c.max.y - 0.1) / 2, cz, 0.04));
+  group.add(bx(c.max.x - c.min.x + 0.15, 0.1, c.max.z - c.min.z + 0.2, 0xff8a3d, cx, c.max.y - 0.05, cz, 0.03));
+  for (const x of [c.min.x + 1.2, c.min.x + 3, c.min.x + 4.8, c.min.x + 6.6]) {
+    group.add(bx(0.7, 0.04, 0.5, 0x6a6a74, x, c.max.y + 0.03, cz - 0.25, 0.01));
+    group.add(bx(0.7, 0.05, 0.5, 0xffd23f, x, c.max.y + 0.08, cz - 0.25, 0.01));
+  }
+  const guard = new THREE.Mesh(new THREE.PlaneGeometry(c.max.x - c.min.x - 0.6, 0.55), new THREE.MeshBasicMaterial({ color: 0xbfe6ff, transparent: true, opacity: 0.25, side: THREE.DoubleSide }));
+  guard.position.set(cx, c.max.y + 0.4, c.min.z + 0.1);
+  group.add(guard);
+
+  const nook = SPOTS.find((q) => q.id === 'lunchNook');
+  group.add(bx(nook.x1 - nook.x0, 0.04, nook.z1 - nook.z0, 0x6a6a74, (nook.x0 + nook.x1) / 2, 0.03, (nook.z0 + nook.z1) / 2, 0.01));
+  for (const y of [1.2, 2.0]) group.add(bx(nook.x1 - nook.x0 - 0.4, 0.08, 0.5, 0xc8c8d0, (nook.x0 + nook.x1) / 2, y, 14.7, 0.02));
+  for (let i = 0; i < 7; i++) group.add(bx(0.5, 0.22, 0.4, [0xe74c3c, 0xf1c40f, 0x3498db][i % 3], nook.x0 + 0.5 + i * 0.95, 1.35, 14.7, 0.03));
+  const lunch = signPlane(5, 0.8, 'LUNCH LINE', '#e74c3c', '#ffffff', 640);
+  lunch.rotation.y = Math.PI;
+  lunch.position.set(7, 3.2, 14.9);
+  group.add(lunch);
+  const menu = signPlane(3.6, 1.3, 'TODAY: PIZZA!', '#2b3a2b', '#fff3c4', 512);
+  menu.position.set(-0.6, 3.1, 14.92);
+  menu.rotation.y = Math.PI;
+  group.add(menu);
+  const win = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.8), glow(0xbfe6ff));
+  win.rotation.y = -Math.PI / 2;
+  win.position.set(10.9, 3.2, 4.5);
+  group.add(win);
+}
+
+function buildGym(group) {
+  const lineMat = 0xffffff;
+  const L = (w, d, x, z) => group.add(bx(w, 0.02, d, lineMat, x, 0.035, z, 0));
+  L(7.8, 0.12, 16.4, 2.2); L(7.8, 0.12, 16.4, 14.2);
+  L(0.12, 12, 12.5, 8.2); L(0.12, 12, 20.3, 8.2);
+  L(7.8, 0.1, 16.4, 8.2);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.4, 0.05, 6, 40), new THREE.MeshBasicMaterial({ color: lineMat }));
+  ring.rotation.x = Math.PI / 2;
+  ring.position.set(16.4, 0.04, 8.2);
+  group.add(ring);
+  L(2.4, 0.1, 18, 11.2); L(0.1, 3, 16.8, 12.7); L(0.1, 3, 19.2, 12.7);
+
+  group.add(bx(2.2, 1.4, 0.1, 0xffffff, 18, 3.6, 14.9, 0.03));
+  group.add(bx(0.8, 0.5, 0.05, 0xd2272f, 18, 3.4, 14.84, 0.01));
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.04, 8, 24), new THREE.MeshPhongMaterial({ color: 0xff6a00 }));
+  rim.rotation.x = Math.PI / 2;
+  rim.position.set(18, 3.0, 14.4);
+  group.add(rim);
+  group.add(bx(2.2, 1.4, 0.1, 0xffffff, 14.5, 3.6, 1.1, 0.03));
+  const rim2 = rim.clone();
+  rim2.position.set(14.5, 3.0, 1.6);
+  group.add(rim2);
+
+  const b = SOLIDS.find((q) => q.id === 'bleachers');
+  const bz = (b.min.z + b.max.z) / 2, bl = b.max.z - b.min.z;
+  for (let i = 0; i < 4; i++) {
+    const h = 0.55 * (i + 1);
+    group.add(bx(0.45, h, bl, i % 2 ? 0xf1b40f : 0x2f6fb5, b.min.x + 0.225 + i * 0.45, h / 2, bz, 0.02));
+  }
+  group.add(bx(0.06, 1.0, bl, 0x555a66, b.min.x - 0.02, 0.5, bz, 0.01));
+
+  const nook = SPOTS.find((q) => q.id === 'bleacherNook');
+  group.add(bx(nook.x1 - nook.x0, 0.03, nook.z1 - nook.z0, 0x3b6ea8, (nook.x0 + nook.x1) / 2, 0.03, (nook.z0 + nook.z1) / 2, 0.01));
+
+  const cart = SOLIDS.find((q) => q.id === 'ballCart');
+  const kx = (cart.min.x + cart.max.x) / 2, kz = (cart.min.z + cart.max.z) / 2;
+  group.add(bx(1.4, 0.7, 1.2, 0x555a66, kx, 0.55, kz, 0.04));
+  for (const x of [-0.45, 0, 0.45]) for (const z of [-0.3, 0.3]) group.add(ball(0.24, x ? 0xff7a1c : 0xe74c3c, kx + x, 1.05, kz + z));
+  for (const x of [-0.55, 0.55]) for (const z of [-0.45, 0.45]) group.add(bx(0.1, 0.2, 0.1, 0x222222, kx + x, 0.1, kz + z, 0.02));
+
+  const crates = SOLIDS.find((q) => q.id === 'crates');
+  const rx = (crates.min.x + crates.max.x) / 2, rz = (crates.min.z + crates.max.z) / 2;
+  group.add(bx(1.4, 0.7, 1.4, 0xc99b5a, rx, 0.35, rz, 0.03));
+  group.add(bx(1.2, 0.7, 1.2, 0xb8864a, rx, 1.05, rz, 0.03));
+
+  const v = SOLIDS.find((q) => q.id === 'vaultBox');
+  const vx = (v.min.x + v.max.x) / 2, vz = (v.min.z + v.max.z) / 2;
+  group.add(bx(1.6, 0.75, 1.1, 0x8f5d2e, vx, 0.38, vz, 0.03));
+  group.add(bx(1.6, 0.3, 1.1, 0x2f6fb5, vx, 0.9, vz, 0.05));
+
+  for (const [x, z] of [[13.4, 4], [19.6, 6], [14, 13.1]]) {
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.5, 12), new THREE.MeshPhongMaterial({ color: 0xff7a1c }));
+    cone.position.set(x, 0.25, z);
+    group.add(cone);
+  }
+  group.add(ball(0.24, 0xff7a1c, 16.4, 0.24, 8.2));
+
+  const banner = signPlane(8, 1.2, 'BUZZ BEES GYM', '#f1b40f', '#2b1b00', 768);
+  banner.rotation.y = Math.PI;
+  banner.position.set(19, 4.4, 14.9);
+  group.add(banner);
+  group.add(bx(0.12, 1.3, 3.2, 0x1b1b1b, 12.1, 3.6, 4.5, 0.03));
+  const score = signPlane(3, 1.1, 'HOME 0  GUEST 0', '#111111', '#ff4d4d', 512);
+  score.rotation.y = Math.PI / 2;
+  score.position.set(12.18, 3.6, 4.5);
+  group.add(score);
+}
+
+function buildDoorHeaders(group) {
+  const out = [];
+  for (const [x, text, bg, fg] of [[-7, 'CLASSROOM', '#2f6fb5', '#ffe14d'], [5, 'CAFETERIA', '#e8a23a', '#2b1b00'], [18, 'GYM', '#2e9b4a', '#ffffff']]) {
+    const g = new THREE.Group();
+    g.add(bx(4.4, 1.4, 1, 0xf6e7a8, x, 4.8, 0.5, 0.03));
+    const sign = signPlane(3.4, 0.8, text, bg, fg, 512);
+    sign.rotation.y = Math.PI;
+    sign.position.set(x, 4.8, -0.03);
+    g.add(sign);
+    group.add(g);
+    out.push(g);
+  }
+  return out;
+}
+
 function buildExit(group) {
   const x = 23.9;
   const dark = glow(0x15151c);
@@ -225,6 +365,8 @@ export function buildSchool() {
 
   root.add(floorPlane(-25, -9, 25, 0.5, tiled(25, 5, '#f4efe2', '#9db4cf')));
   root.add(floorPlane(-25, 0.5, -1, 16, planks(8, 4)));
+  root.add(floorPlane(-1, 0.5, 11.5, 16, tiled(6.25, 7.75, '#f7e1b5', '#d98c4a')));
+  root.add(floorPlane(11.5, 0.5, 25, 16, planks(7, 5)));
   const void_ = new THREE.Mesh(new THREE.PlaneGeometry(120, 120), new THREE.MeshBasicMaterial({ color: 0x0e1a2c }));
   void_.rotation.x = -Math.PI / 2;
   void_.position.y = -0.05;
@@ -252,6 +394,10 @@ export function buildSchool() {
   bin.position.set((can.min.x + can.max.x) / 2, 0.5, (can.min.z + can.max.z) / 2);
   root.add(bin);
   buildClassroom(root);
+  buildCafeteria(root);
+  buildGym(root);
+  const headers = buildDoorHeaders(root);
+  wallGroups.push(...headers.map((g) => ({ g, hide: true, boxes: WALLS.filter((w) => w.id.startsWith('wallHS')) })));
   const exit = buildExit(root);
 
   const banner = signPlane(9, 1.5, 'BEL AIR', '#2f6fb5', '#ffe14d', 768);
@@ -261,11 +407,16 @@ export function buildSchool() {
   banner2.position.set(12, 4.5, -7.95);
   root.add(banner2);
 
-  const lamps = [[-18, -4], [-7, -4], [8, -4], [20, -4], [-18, 8], [-8, 8]];
+  const lamps = [[-18, -4], [-7, -4], [8, -4], [20, -4], [-18, 8], [-8, 8], [5, 4.8], [5, 8.8], [16.4, 4], [16.4, 12]];
   for (const [x, z] of lamps) root.add(bx(1.4, 0.15, 0.6, 0xfff7d0, x, 5.35, z, 0.05));
 
   function lowerWalls(camX, camZ, px, pz) {
-    for (const w of wallGroups) w.g.scale.y = segmentBlocked(camX, camZ, px, pz, w.boxes, 0.6) ? 0.25 : 1;
+    for (const w of wallGroups) {
+      const low = segmentBlocked(camX, camZ, px, pz, w.boxes, 0.6)
+        || w.boxes.some((b) => camX > b.min.x - 1.5 && camX < b.max.x + 1.5 && camZ > b.min.z - 1.5 && camZ < b.max.z + 1.5);
+      if (w.hide) w.g.visible = !low;
+      else w.g.scale.y = low ? 0.25 : 1;
+    }
   }
 
   return { group: root, setExitOpen: exit.set, lowerWalls };

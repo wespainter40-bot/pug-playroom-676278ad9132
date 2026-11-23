@@ -4,12 +4,12 @@ import { buildCharacter, animateCharacter, CHARACTERS } from '../characters.js';
 import { createSeeker, STANCE_NOISE } from './seeker.js';
 import {
   START, EXIT, CARD_RADIUS, SEEKER, SOLIDS, CARDS, WAYPOINTS, NAV, STANCE_SPEED,
-  movers, sighters, isHidden, stanceFor, roomIdAt, createBelRun,
+  movers, sighters, isHidden, stanceFor, roomIdAt, createBelRun, SPEED_PER_CARD, SPEED_CAP,
 } from './belair-layout.js';
 import { buildSchool, buildCard, buildBeam } from './belair-scene.js';
 
 const CAM_DIST = 6.5, CAM_HEIGHT = 3.8;
-const CAM_BOX = { minX: -23, maxX: 23, minZ: -7.2, maxZ: 14.3 };
+const CAM_BOX = { minX: -23, maxX: 22.4, minZ: -7.2, maxZ: 14.3 };
 const DEV_SPEED = 1.6;
 const TUNE = 'game';
 const TICKLE_SECONDS = 1.5, SLEEP_AFTER_CATCH = 2.5, START_SLEEP = 2.5;
@@ -122,6 +122,11 @@ export function startBelAir(ctx) {
     if (!musicDropped) { musicDropped = true; audio?.music(null); }
   }
 
+  function refreshSpeed() {
+    const base = appliedScary ? SEEKER.scaryScale : 1;
+    seeker.setSpeedScale(Math.min(SPEED_CAP, 1 + SPEED_PER_CARD * run.cardCount()) * base);
+  }
+
   function applyScary(on) {
     appliedScary = on;
     const L = on ? LIGHT.scary : LIGHT.gentle;
@@ -129,7 +134,7 @@ export function startBelAir(ctx) {
     dir.intensity = L.dir;
     lantern.intensity = L.lantern;
     scene.background = new THREE.Color(L.sky);
-    seeker.setSpeedScale(on ? SEEKER.scaryScale : 1);
+    refreshSpeed();
     panic.classList.toggle('hidden', !on);
     if (!on) restoreMusic();
   }
@@ -153,6 +158,7 @@ export function startBelAir(ctx) {
   function collectCard(c) {
     if (!c.mesh.visible || !run.collect(c.id)) return;
     c.mesh.visible = false;
+    refreshSpeed();
     audio?.sfx('bone');
     if (!run.canExit()) ui.toast(`Bee Key Card ${run.cardCount()} of ${CARDS.length}!`, 1800);
   }
@@ -180,6 +186,7 @@ export function startBelAir(ctx) {
 
   function reset() {
     run = createBelRun();
+    refreshSpeed();
     noise = 0;
     finished = false;
     lastResult = null;
